@@ -66,7 +66,7 @@ cd backend
 mvn spring-boot:run
 ```
 
-Backend: http://localhost:8080
+Backend: http://localhost:8080/swagger-ui/index.html#
 
 ### 3. รัน Frontend
 
