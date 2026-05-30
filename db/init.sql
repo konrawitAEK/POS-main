@@ -123,8 +123,8 @@ CREATE INDEX idx_stock_product     ON stock(product_id);
 
 -- Seed Data
 INSERT INTO users (username, password, full_name, role, email) VALUES
-('admin',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'System Admin', 'ADMIN',   'admin@pos.com'),
-('cashier1', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'สมชาย รักงาน', 'CASHIER', 'cashier1@pos.com');
+('admin',    '$2a$10$HDCnk56g7YbKASomskMF5uiGfFJzHeo06vkm5/qmAjA.28MSOQ/y.', 'System Admin', 'ADMIN',   'admin@pos.com'),
+('cashier1', '$2a$10$HDCnk56g7YbKASomskMF5uiGfFJzHeo06vkm5/qmAjA.28MSOQ/y.', 'สมชาย รักงาน', 'CASHIER', 'cashier1@pos.com');
 
 INSERT INTO categories (name, description) VALUES
 ('อาหารและเครื่องดื่ม', 'สินค้าประเภทอาหารและเครื่องดื่ม'),

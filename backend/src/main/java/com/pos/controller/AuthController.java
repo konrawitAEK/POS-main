@@ -24,17 +24,28 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
-        Optional<User> userOpt = userRepository.findByUsername(req.getUsername())
-                .filter(u -> u.getIsActive() && passwordEncoder.matches(req.getPassword(), u.getPassword()));
+        Optional<User> userOpt = userRepository.findByUsername(req.getUsername());
 
         if (userOpt.isEmpty()) {
-            return ResponseEntity.status(401).body(Map.of("message", "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"));
+            return ResponseEntity.status(401).body(Map.of("message", "ไม่พบ username"));
         }
 
         User u = userOpt.get();
+
+        if (!Boolean.TRUE.equals(u.getIsActive())) {
+            return ResponseEntity.status(401).body(Map.of("message", "user ถูกปิดใช้งาน"));
+        }
+
+        if (!passwordEncoder.matches(req.getPassword(), u.getPassword())) {
+            return ResponseEntity.status(401).body(Map.of("message", "password ไม่ถูกต้อง"));
+        }
+
         return ResponseEntity.ok(new LoginResponse(
                 jwtUtil.generateToken(u.getUsername(), u.getRole()),
-                u.getUsername(), u.getFullName(), u.getRole()));
+                u.getUsername(),
+                u.getFullName(),
+                u.getRole()
+        ));
     }
 
     @GetMapping("/me")
