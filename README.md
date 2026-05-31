@@ -59,6 +59,26 @@ docker-compose up -d
 - PostgreSQL: `localhost:5432` (user: `pos_user`, pass: `pos_password`, db: `pos_db`)
 - pgAdmin: http://localhost:5050 (email: `admin@pos.com`, pass: `admin123`)
 
+> **หมายเหตุ:** ไฟล์ `db/init.sql` (Schema + Seed Data) จะถูกรันอัตโนมัติตอน container สร้างครั้งแรก ไม่ต้อง import เอง
+
+#### รัน SQL ด้วยตนเอง (กรณีต้องการ)
+
+```bash
+# เข้า psql ใน container
+docker exec -it pos_postgres psql -U pos_user -d pos_db
+
+# หรือ import ไฟล์โดยตรง
+docker exec -i pos_postgres psql -U pos_user -d pos_db < db/init.sql
+```
+
+#### Reset Database (ล้างข้อมูลทั้งหมดแล้วสร้างใหม่)
+
+```bash
+cd db
+docker-compose down -v        # หยุด container และลบ volume
+docker-compose up -d          # สร้างใหม่ + รัน init.sql อัตโนมัติ
+```
+
 ### 2. รัน Backend
 
 ```bash
