@@ -1,8 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import api from '@/lib/api'
-
-interface Order { id: number; orderNumber: string; status: string; total: number; createdAt: string; userName: string }
+import { orderService, type Order } from '@/services/orderService'
 
 const statusLabel: Record<string, string> = { COMPLETED:'สำเร็จ', PENDING:'รอ', CANCELLED:'ยกเลิก', REFUNDED:'คืนเงิน' }
 const statusColor: Record<string, string> = {
@@ -14,7 +12,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([])
 
   useEffect(() => {
-    api.get('/api/orders?size=50').then(r => setOrders(r.data.content || [])).catch(() => {})
+    orderService.getAll().then(setOrders).catch(() => {})
   }, [])
 
   return (

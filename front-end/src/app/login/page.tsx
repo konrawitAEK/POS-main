@@ -1,26 +1,37 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import api from '@/lib/api'
+import { authService } from '@/services/authService'
 import { useAuthStore } from '@/store/authStore'
 import toast from 'react-hot-toast'
 
+const ROLE_ROUTES: Record<string, string> = {
+  admin: '/dashboard',
+  cashier: '/pos',
+}
+
 export default function LoginPage() {
   const router = useRouter()
-  const login  = useAuthStore((s) => s.login)
+  const { token, user, login } = useAuthStore()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading,  setLoading]  = useState(false)
+
+  useEffect(() => {
+    if (token) {
+      router.replace(ROLE_ROUTES[user?.role ?? ''] ?? '/dashboard')
+    }
+  }, [token, user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      const { data } = await api.post('/api/auth/login', { username, password })
+      const data = await authService.login(username, password)
       localStorage.setItem('token', data.token)
       login(data.token, { username: data.username, fullName: data.fullName, role: data.role })
       toast.success(`ยินดีต้อนรับ ${data.fullName}`)
-      router.push('/dashboard')
+      router.push(ROLE_ROUTES[data.role] ?? '/dashboard')
     } catch {
       toast.error('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง')
     } finally {

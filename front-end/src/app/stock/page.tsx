@@ -1,23 +1,21 @@
 'use client'
 import { useEffect, useState } from 'react'
-import api from '@/lib/api'
+import { stockService, type StockItem } from '@/services/stockService'
 import toast from 'react-hot-toast'
 import { FiAlertTriangle } from 'react-icons/fi'
 import clsx from 'clsx'
-
-interface StockItem { id: number; productId: number; productName: string; quantity: number; minQuantity: number; maxQuantity: number; lowStock: boolean }
 
 export default function StockPage() {
   const [stocks,    setStocks]    = useState<StockItem[]>([])
   const [adjustId,  setAdjustId]  = useState<number | null>(null)
   const [adjustQty, setAdjustQty] = useState(0)
 
-  const fetch = () => api.get('/api/stock').then(r => setStocks(r.data)).catch(() => {})
-  useEffect(() => { fetch() }, [])
+  const load = () => stockService.getAll().then(setStocks).catch(() => {})
+  useEffect(() => { load() }, [])
 
   const save = async (productId: number) => {
-    await api.patch(`/api/stock/${productId}/adjust`, { quantity: adjustQty })
-    toast.success('ปรับสต็อกสำเร็จ'); setAdjustId(null); fetch()
+    await stockService.adjust(productId, adjustQty)
+    toast.success('ปรับสต็อกสำเร็จ'); setAdjustId(null); load()
   }
 
   return (

@@ -1,10 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
-import api from '@/lib/api'
+import { productService, type Product } from '@/services/productService'
+import { orderService, type OrderItem } from '@/services/orderService'
 import toast from 'react-hot-toast'
 import { FiSearch, FiTrash2, FiShoppingCart } from 'react-icons/fi'
 
-interface Product { id: number; name: string; price: number; barcode: string }
 interface CartItem extends Product { quantity: number }
 
 export default function PosPage() {
@@ -15,7 +15,7 @@ export default function PosPage() {
   const [loading, setLoading]  = useState(false)
 
   useEffect(() => {
-    api.get('/api/products?size=100').then(r => setProducts(r.data.content || [])).catch(() => {})
+    productService.getAll('', 100).then(r => setProducts(r.content)).catch(() => {})
   }, [])
 
   const filtered = products.filter(p =>
@@ -38,7 +38,8 @@ export default function PosPage() {
     if (!cart.length) return toast.error('ไม่มีสินค้าในตะกร้า')
     setLoading(true)
     try {
-      await api.post('/api/orders', { items: cart.map(i => ({ productId: i.id, quantity: i.quantity })), paymentMethod: method })
+      const items: OrderItem[] = cart.map(i => ({ productId: i.id, quantity: i.quantity }))
+      await orderService.create(items, method)
       toast.success('ชำระเงินสำเร็จ!')
       setCart([])
     } catch (err: any) {

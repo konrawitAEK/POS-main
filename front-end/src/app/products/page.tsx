@@ -1,28 +1,26 @@
 'use client'
 import { useEffect, useState } from 'react'
-import api from '@/lib/api'
+import { productService, type Product } from '@/services/productService'
 import toast from 'react-hot-toast'
 import { FiSearch, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi'
-
-interface Product { id: number; name: string; barcode: string; price: number; costPrice: number; categoryName?: string }
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [search,   setSearch]   = useState('')
   const [loading,  setLoading]  = useState(false)
 
-  const fetch = async () => {
+  const load = async () => {
     setLoading(true)
-    api.get(`/api/products?q=${search}&size=50`).then(r => setProducts(r.data.content || [])).finally(() => setLoading(false))
+    productService.getAll(search).then(r => setProducts(r.content)).finally(() => setLoading(false))
   }
 
-  useEffect(() => { fetch() }, [search])
+  useEffect(() => { load() }, [search])
 
   const remove = async (id: number) => {
     if (!confirm('ยืนยันการลบสินค้า?')) return
-    await api.delete(`/api/products/${id}`)
+    await productService.remove(id)
     toast.success('ลบสินค้าแล้ว')
-    fetch()
+    load()
   }
 
   return (

@@ -1,18 +1,15 @@
 'use client'
 import { useEffect, useState } from 'react'
-import api from '@/lib/api'
+import { dashboardService, type DailySummary, type LowStockItem } from '@/services/dashboardService'
 import { FiShoppingBag, FiDollarSign, FiAlertTriangle } from 'react-icons/fi'
 
-interface Summary { count: number; total: number }
-interface LowStock { id: number; quantity: number; minQuantity: number; productName: string }
-
 export default function DashboardPage() {
-  const [summary,  setSummary]  = useState<Summary>({ count: 0, total: 0 })
-  const [lowStock, setLowStock] = useState<LowStock[]>([])
+  const [summary,  setSummary]  = useState<DailySummary>({ count: 0, total: 0 })
+  const [lowStock, setLowStock] = useState<LowStockItem[]>([])
 
   useEffect(() => {
-    api.get('/api/orders/summary/today').then(r => setSummary(r.data)).catch(() => {})
-    api.get('/api/stock/low').then(r => setLowStock(r.data)).catch(() => {})
+    dashboardService.getTodaySummary().then(setSummary).catch(() => {})
+    dashboardService.getLowStock().then(setLowStock).catch(() => {})
   }, [])
 
   const stats = [

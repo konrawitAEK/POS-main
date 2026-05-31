@@ -1,27 +1,25 @@
 'use client'
 import { useEffect, useState } from 'react'
-import api from '@/lib/api'
+import { categoryService, type Category } from '@/services/categoryService'
 import toast from 'react-hot-toast'
 import { FiPlus, FiTrash2 } from 'react-icons/fi'
-
-interface Category { id: number; name: string; description: string }
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [name, setName] = useState(''); const [desc, setDesc] = useState('')
 
-  const fetch = () => api.get('/api/categories').then(r => setCategories(r.data)).catch(() => {})
-  useEffect(() => { fetch() }, [])
+  const load = () => categoryService.getAll().then(setCategories).catch(() => {})
+  useEffect(() => { load() }, [])
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault()
-    try { await api.post('/api/categories', { name, description: desc }); toast.success('เพิ่มแล้ว'); setName(''); setDesc(''); fetch() }
+    try { await categoryService.create(name, desc); toast.success('เพิ่มแล้ว'); setName(''); setDesc(''); load() }
     catch { toast.error('มีหมวดหมู่นี้แล้ว') }
   }
 
   const remove = async (id: number) => {
     if (!confirm('ยืนยันการลบ?')) return
-    await api.delete(`/api/categories/${id}`); toast.success('ลบแล้ว'); fetch()
+    await categoryService.remove(id); toast.success('ลบแล้ว'); load()
   }
 
   return (
