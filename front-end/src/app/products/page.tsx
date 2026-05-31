@@ -1,13 +1,15 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { productService, type Product } from '@/services/productService'
+import ProductDrawer from '@/components/ProductDrawer'
 import toast from 'react-hot-toast'
 import { FiSearch, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi'
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [search,   setSearch]   = useState('')
-  const [loading,  setLoading]  = useState(false)
+  const [products,     setProducts]     = useState<Product[]>([])
+  const [search,       setSearch]       = useState('')
+  const [loading,      setLoading]      = useState(false)
+  const [drawerOpen,   setDrawerOpen]   = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -25,9 +27,10 @@ export default function ProductsPage() {
 
   return (
     <div>
+      <ProductDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} onSuccess={load} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">จัดการสินค้า</h1>
-        <button className="btn-primary flex items-center gap-2"><FiPlus />เพิ่มสินค้า</button>
+        <button onClick={() => setDrawerOpen(true)} className="btn-primary flex items-center gap-2"><FiPlus />เพิ่มสินค้า</button>
       </div>
       <div className="card">
         <div className="relative mb-4">
