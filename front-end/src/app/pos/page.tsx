@@ -15,7 +15,7 @@ export default function PosPage() {
   const [loading, setLoading]  = useState(false)
 
   useEffect(() => {
-    productService.getAll('', 100).then(r => setProducts(r.content)).catch(() => {})
+    productService.getAll('', undefined, 100).then(r => setProducts(r.content)).catch(() => {})
   }, [])
 
   const filtered = products.filter(p =>
