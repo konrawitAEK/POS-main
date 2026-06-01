@@ -11,9 +11,13 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     Optional<Product> findByBarcode(String barcode);
     Page<Product> findByIsActiveTrue(Pageable pageable);
-    Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
+    Page<Product> findByCategoryIdAndIsActiveTrue(Long categoryId, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.isActive = true AND " +
            "(LOWER(p.name) LIKE LOWER(CONCAT('%',:q,'%')) OR p.barcode LIKE CONCAT('%',:q,'%'))")
     Page<Product> search(@Param("q") String query, Pageable pageable);
+
+    @Query("SELECT p FROM Product p WHERE p.isActive = true AND p.category.id = :categoryId AND " +
+           "(LOWER(p.name) LIKE LOWER(CONCAT('%',:q,'%')) OR p.barcode LIKE CONCAT('%',:q,'%'))")
+    Page<Product> searchByCategory(@Param("q") String q, @Param("categoryId") Long categoryId, Pageable pageable);
 }

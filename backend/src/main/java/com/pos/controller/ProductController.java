@@ -3,8 +3,10 @@ package com.pos.controller;
 import com.pos.dto.request.ProductRequest;
 import com.pos.dto.response.ProductResponse;
 import com.pos.entity.Product;
+import com.pos.entity.Stock;
 import com.pos.repository.CategoryRepository;
 import com.pos.repository.ProductRepository;
+import com.pos.repository.StockRepository;
 import com.pos.repository.SupplierRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,16 +25,27 @@ public class ProductController {
     private final ProductRepository  productRepository;
     private final CategoryRepository categoryRepository;
     private final SupplierRepository supplierRepository;
+    private final StockRepository    stockRepository;
 
     @GetMapping
     public ResponseEntity<Page<ProductResponse>> list(
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false)    String q) {
+            @RequestParam(required = false)    String q,
+            @RequestParam(required = false)    Long categoryId) {
         var pageable = PageRequest.of(page, size, Sort.by("name"));
-        Page<Product> result = (q != null && !q.isBlank())
-                ? productRepository.search(q, pageable)
-                : productRepository.findByIsActiveTrue(pageable);
+        boolean hasQuery    = q != null && !q.isBlank();
+        boolean hasCategory = categoryId != null;
+        Page<Product> result;
+        if (hasQuery && hasCategory) {
+            result = productRepository.searchByCategory(q, categoryId, pageable);
+        } else if (hasQuery) {
+            result = productRepository.search(q, pageable);
+        } else if (hasCategory) {
+            result = productRepository.findByCategoryIdAndIsActiveTrue(categoryId, pageable);
+        } else {
+            result = productRepository.findByIsActiveTrue(pageable);
+        }
         return ResponseEntity.ok(result.map(ProductResponse::from));
     }
 
@@ -53,7 +66,12 @@ public class ProductController {
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest req) {
         Product p = new Product();
         applyRequest(p, req);
-        return ResponseEntity.ok(ProductResponse.from(productRepository.save(p)));
+        Product saved = productRepository.save(p);
+        Stock stock = new Stock();
+        stock.setProduct(saved);
+        stock.setQuantity(0);
+        saved.setStock(stockRepository.save(stock));
+        return ResponseEntity.ok(ProductResponse.from(saved));
     }
 
     @PutMapping("/{id}")
